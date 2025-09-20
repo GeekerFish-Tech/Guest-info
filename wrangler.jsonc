@@ -1,5 +1,5 @@
 {
-    "name": "ip-info",
+    "name": "guest-info",
     "compatibility_date": "2025-09-20",
     "assets": {
       "directory": "./"
