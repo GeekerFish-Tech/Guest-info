@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>访客网络信息面板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0e1a;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0);
+            background-size: 2rem 2rem;
+        }
+        .info-card {
+            background-color: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .speed-value.speed-green { color: #4ade80; }
+        .speed-value.speed-orange { color: #facc15; }
+        .speed-value.speed-red { color: #f87171; }
+        .speed-value.speed-gray { color: #9ca3af; }
+
+        .copyable {
+            cursor: pointer;
+            transition: color 0.2s ease-in-out;
+        }
+        .copyable:hover {
+            color: #22d3ee;
+        }
+    </style>
+</head>
+<body class="text-gray-300">
+
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-6xl mx-auto">
+            <header class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">访客网络信息面板</h1>
+                <p class="text-gray-400 mt-2">实时检测您的网络连接、IP地址和性能</p>
+            </header>
+
+            <main class="info-card rounded-2xl shadow-2xl p-6 md:p-8">
+                <!-- Main Grid Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    
+                    <!-- Left Column: Your Connection -->
+                    <div class="space-y-6">
+                        <h2 class="text-xl font-semibold text-cyan-400 border-b border-gray-700 pb-3">您的连接信息</h2>
+                        
+                        <div class="grid grid-cols-3 gap-4 items-center">
+                            <span class="text-gray-400 col-span-1">访问优先</span>
+                            <div id="ip-priority" class="font-mono col-span-2 bg-gray-700 h-5 w-20 rounded animate-pulse"></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 items-start">
+                            <span class="text-gray-400 col-span-1 pt-1">IPv4 地址</span>
+                            <div class="col-span-2">
+                                <div id="ip-v4" class="font-mono bg-gray-700 h-5 w-3/4 rounded animate-pulse"></div>
+                                <div id="ip-v4-addr" class="text-sm text-gray-500 mt-1 bg-gray-700 h-4 w-full rounded animate-pulse"></div>
+                            </div>
+                        </div>
+                         <div class="grid grid-cols-3 gap-4 items-start">
+                            <span class="text-gray-400 col-span-1 pt-1">IPv4 溯源</span>
+                            <div id="ip-trace" class="col-span-2 text-sm text-gray-400 bg-gray-700 h-8 w-full rounded animate-pulse"></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 items-start">
+                            <span class="text-gray-400 col-span-1 pt-1">WebRTC 泄露</span>
+                            <div id="webrtc-leak" class="col-span-2 text-sm bg-gray-700 h-5 w-full rounded animate-pulse"></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 items-start">
+                            <span class="text-gray-400 col-span-1 pt-1">IPv6 地址</span>
+                             <div class="col-span-2">
+                                <div id="ip-v6" class="font-mono bg-gray-700 h-5 w-3/4 rounded animate-pulse"></div>
+                                <div id="ip-v6-addr" class="text-sm text-gray-500 mt-1 bg-gray-700 h-4 w-full rounded animate-pulse"></div>
+                            </div>
+                        </div>
+                         <div class="grid grid-cols-3 gap-4 items-center">
+                            <span class="text-gray-400 col-span-1">操作系统</span>
+                            <div id="os-type" class="col-span-2 bg-gray-700 h-5 w-24 rounded animate-pulse"></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 items-start">
+                            <span class="text-gray-400 col-span-1 pt-1">User Agent</span>
+                            <div id="ua" class="col-span-2 text-xs text-gray-500 break-all bg-gray-700 h-10 w-full rounded animate-pulse"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Network Tests -->
+                    <div class="space-y-8">
+                        <div>
+                            <h2 class="text-xl font-semibold text-cyan-400 border-b border-gray-700 pb-3 mb-6">常用网站测速</h2>
+                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                                <div class="bg-gray-900/50 p-3 rounded-lg">
+                                    <div class="text-sm text-gray-400">Baidu</div>
+                                    <div id="speed-baidu" class="speed-value font-bold text-lg mt-1">测速中...</div>
+                                </div>
+                                <div class="bg-gray-900/50 p-3 rounded-lg">
+                                    <div class="text-sm text-gray-400">Github</div>
+                                    <div id="speed-github" class="speed-value font-bold text-lg mt-1">测速中...</div>
+                                </div>
+                                <div class="bg-gray-900/50 p-3 rounded-lg">
+                                    <div class="text-sm text-gray-400">Cloudflare</div>
+                                    <div id="speed-cloudflare" class="speed-value font-bold text-lg mt-1">测速中...</div>
+                                </div>
+                                <div class="bg-gray-900/50 p-3 rounded-lg">
+                                    <div class="text-sm text-gray-400">Google</div>
+                                    <div id="speed-google" class="speed-value font-bold text-lg mt-1">测速中...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                           <h2 class="text-xl font-semibold text-cyan-400 border-b border-gray-700 pb-3 mb-6">节点 IP 测试</h2>
+                           <div class="space-y-3 text-sm">
+                                <div class="grid grid-cols-3 gap-4">
+                                    <span class="text-gray-500">国内 IPv4</span>
+                                    <div id="node-itdog-v4-cm" class="col-span-2 text-gray-400 font-mono bg-gray-700 h-4 w-full rounded animate-pulse"></div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <span class="text-gray-500">国内 IPv6</span>
+                                    <div id="node-itdog-v6-cm" class="col-span-2 text-gray-400 font-mono bg-gray-700 h-4 w-full rounded animate-pulse"></div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <span class="text-gray-500">港澳台 IPv4</span>
+                                    <div id="node-itdog-v4-over" class="col-span-2 text-gray-400 font-mono bg-gray-700 h-4 w-full rounded animate-pulse"></div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <span class="text-gray-500">港澳台 IPv6</span>
+                                    <div id="node-itdog-v6-over" class="col-span-2 text-gray-400 font-mono bg-gray-700 h-4 w-full rounded animate-pulse"></div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <span class="text-gray-500">海外 IPv4</span>
+                                    <div id="node-lvhai-v4" class="col-span-2 text-gray-400 font-mono bg-gray-700 h-4 w-full rounded animate-pulse"></div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <span class="text-gray-500">海外 IPv6</span>
+                                    <div id="node-lvhai-v6" class="col-span-2 text-gray-400 font-mono bg-gray-700 h-4 w-full rounded animate-pulse"></div>
+                                </div>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="text-center mt-8 pt-6 border-t border-gray-700">
+                    <p class="text-sm text-gray-500">
+                        Powered By <a href="https://github.com/GeekerFish-Tech/IP-info" target="_blank" rel="noopener noreferrer" class="text-cyan-500 hover:text-cyan-400 transition-colors">GeekerFish</a>
+                    </p>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- UTILITY FUNCTIONS ---
+
+    const updateElement = (id, { text = null, addClass = [], removeClass = [] } = {}) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (text !== null) el.textContent = text;
+        if (removeClass.length) el.classList.remove(...removeClass);
+        if (addClass.length) el.classList.add(...addClass);
+        return el;
+    };
+    
+    const copyToClipboard = (text, element) => {
+        if (!text || !element) return;
+        const textToCopy = text.split(' ')[0]; // Copy only the IP part
+        const textarea = document.createElement('textarea');
+        textarea.value = textToCopy;
+        textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page in MS Edge.
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            const originalText = element.textContent;
+            element.textContent = '已复制!';
+            setTimeout(() => {
+                element.textContent = originalText;
+            }, 1500);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            const originalText = element.textContent;
+            element.textContent = '复制失败!';
+            setTimeout(() => {
+                element.textContent = originalText;
+            }, 1500);
+        }
+        document.body.removeChild(textarea);
+    };
+
+    const fetchJson = async (url, id, formatter) => {
+        try {
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+            const data = await response.json();
+            const content = formatter(data);
+            const el = updateElement(id, { text: content, removeClass: ['animate-pulse', 'bg-gray-700', 'h-5', 'h-4', 'h-8', 'h-10'] });
+            if (el && (id.includes('ip-v4') || id.includes('ip-v6') || id.includes('node-'))) {
+                el.classList.add('copyable');
+                el.title = '点击复制IP';
+                el.addEventListener('click', () => copyToClipboard(content, el));
+            }
+        } catch (error) {
+            console.error(`Fetch error for ${url}:`, error);
+            updateElement(id, { text: '获取失败', addClass: ['text-red-500'], removeClass: ['animate-pulse', 'bg-gray-700', 'h-5', 'h-4', 'h-8', 'h-10'] });
+        }
+    };
+    
+    // --- FEATURE FUNCTIONS ---
+    
+    const getIpPriority = () => {
+        fetchJson('https://test.itdog.cn/', 'ip-priority', data => {
+            let version = data.version || '未知';
+            if (version.toUpperCase() === 'IPV6') return 'IPv6';
+            if (version.toUpperCase() === 'IPV4') return 'IPv4';
+            return version;
+        });
+    };
+
+    const getIpv4Info = async () => {
+        try {
+            const response = await fetch('https://ipv4_ct.itdog.cn/', { cache: 'no-store' });
+            const data = await response.json();
+            
+            const ip = data.ip || '无';
+            const addr = data.address || '';
+            
+            const v4El = updateElement('ip-v4', { text: ip, removeClass: ['animate-pulse', 'bg-gray-700', 'h-5']});
+            updateElement('ip-v4-addr', { text: addr, removeClass: ['animate-pulse', 'bg-gray-700', 'h-4']});
+
+            if (ip !== '无') {
+                v4El.classList.add('copyable');
+                v4El.title = '点击复制IP';
+                v4El.addEventListener('click', () => copyToClipboard(ip, v4El));
+                traceIp(ip);
+                detectWebRTCLeak(ip);
+            } else {
+                 updateElement('ip-trace', { text: '无IP，无法溯源', removeClass: ['animate-pulse', 'bg-gray-700', 'h-8'] });
+                 updateElement('webrtc-leak', { text: '无法检测', removeClass: ['animate-pulse', 'bg-gray-700', 'h-5'] });
+            }
+        } catch (error) {
+            console.error('Error fetching IPv4 info:', error);
+            updateElement('ip-v4', { text: '获取失败', addClass: ['text-red-500'], removeClass: ['animate-pulse', 'bg-gray-700', 'h-5'] });
+            updateElement('ip-v4-addr', { text: '', removeClass: ['animate-pulse', 'bg-gray-700', 'h-4'] });
+            updateElement('ip-trace', { text: '无法溯源', removeClass: ['animate-pulse', 'bg-gray-700', 'h-8'] });
+            updateElement('webrtc-leak', { text: '无法检测', removeClass: ['animate-pulse', 'bg-gray-700', 'h-5'] });
+        }
+    };
+    
+    const getIpv6Info = () => {
+        fetchJson('https://ipv6.itdog.cn/', 'ip-v6', data => data.ip || '无').then(() => {
+            fetchJson('https://ipv6.itdog.cn/', 'ip-v6-addr', data => data.address || '');
+        });
+    };
+
+    const traceIp = (ip) => {
+            // 使用 ipinfo.io 作为新的IP溯源服务
+            fetch(`https://ipinfo.io/${ip}/json`)
+         .then(r => r.json())
+         .then(trace => {
+             if (trace.error) {
+                  updateElement('ip-trace', { text: `溯源失败: ${trace.error.message}`, addClass: ['text-yellow-500'], removeClass: ['animate-pulse', 'bg-gray-700', 'h-8'] });
+             } else {
+                  const info = [
+                      trace.country,
+                      trace.region,
+                      trace.city,
+                      trace.org // ISP info
+                  ].filter(Boolean).join(' - ');
+                  updateElement('ip-trace', { text: info || '无溯源数据', removeClass: ['animate-pulse', 'bg-gray-700', 'h-8'] });
+             }
+         })
+         .catch(() => updateElement('ip-trace', { text: '溯源请求失败', addClass: ['text-red-500'], removeClass: ['animate-pulse', 'bg-gray-700', 'h-8'] }));
+    };
+
+    const detectWebRTCLeak = (publicIp) => {
+        const isPrivateIP = (ip) => /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|127\.)/.test(ip);
+        
+        let foundLeak = false;
+        const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        pc.createDataChannel('');
+        pc.createOffer().then(offer => pc.setLocalDescription(offer));
+        
+        pc.onicecandidate = (e) => {
+            if (!e || !e.candidate || !e.candidate.candidate) return;
+            const ipMatch = e.candidate.candidate.match(/([0-9]{1,3}(?:\.[0-9]{1,3}){3})/);
+            if (ipMatch) {
+                const leakIp = ipMatch[1];
+                if (leakIp !== publicIp && !isPrivateIP(leakIp)) {
+                    foundLeak = true;
+                    updateElement('webrtc-leak', { text: `发现泄露: ${leakIp}`, addClass: ['text-yellow-500', 'copyable'], removeClass: ['animate-pulse', 'bg-gray-700', 'h-5'] })
+                         .addEventListener('click', (event) => copyToClipboard(leakIp, event.target));
+                    pc.close();
+                }
+            }
+        };
+
+        setTimeout(() => {
+             if (!foundLeak) {
+                 updateElement('webrtc-leak', { text: '未发现 WebRTC 泄露', addClass: ['text-green-500'], removeClass: ['animate-pulse', 'bg-gray-700', 'h-5'] });
+            }
+        }, 2000);
+    };
+
+    const getSystemInfo = () => {
+        const ua = navigator.userAgent;
+        updateElement('ua', { text: ua, removeClass: ['animate-pulse', 'bg-gray-700', 'h-10'] });
+        const detectOS = (uaStr) => {
+            uaStr = uaStr.toLowerCase();
+            if (/windows nt/.test(uaStr)) return 'Windows';
+            if (/android/.test(uaStr)) return 'Android';
+            if (/iphone|ipad|ipod/.test(uaStr)) return 'iOS';
+            if (/linux/.test(uaStr) && !/android/.test(uaStr)) return 'Linux';
+            if (/macintosh|mac os x/.test(uaStr)) return 'macOS';
+            return '未知系统';
+        };
+        updateElement('os-type', { text: detectOS(ua), removeClass: ['animate-pulse', 'bg-gray-700', 'h-5'] });
+    };
+
+    const testSpeed = (url, domId) => {
+        const el = document.getElementById(domId);
+        const img = new Image();
+        const startTime = Date.now();
+        let isFinished = false;
+
+        img.onload = img.onerror = () => {
+            if (isFinished) return;
+            isFinished = true;
+            const duration = Date.now() - startTime;
+            let colorClass = 'speed-red';
+            if (duration < 200) colorClass = 'speed-green';
+            else if (duration < 1000) colorClass = 'speed-orange';
+            el.textContent = `${duration} ms`;
+            el.className = `speed-value font-bold text-lg mt-1 ${colorClass}`;
+        };
+        img.src = `${url}/favicon.ico?_t=${Date.now()}`;
+
+        setTimeout(() => {
+            if (!isFinished) {
+                isFinished = true;
+                el.textContent = '超时';
+                el.className = 'speed-value font-bold text-lg mt-1 speed-gray';
+            }
+        }, 5000);
+    };
+
+    const runAllTests = () => {
+        // Run speed tests
+        testSpeed('https://www.baidu.com', 'speed-baidu');
+        testSpeed('https://github.com', 'speed-github');
+        testSpeed('https://cloudflare.com', 'speed-cloudflare');
+        testSpeed('https://www.google.com', 'speed-google');
+
+        // Run Node IP tests
+        const nodeFormatter = data => (data.ip || '获取失败') + (data.address ? ` - ${data.address}` : '');
+        fetchJson('https://ipv4_cm.itdog.cn/', 'node-itdog-v4-cm', nodeFormatter);
+        fetchJson('https://ipv6_cm.itdog.cn/', 'node-itdog-v6-cm', nodeFormatter);
+        fetchJson('https://ipv4-overseas.itdog.plus/', 'node-itdog-v4-over', nodeFormatter);
+        fetchJson('https://ipv6-overseas.itdog.plus/', 'node-itdog-v6-over', nodeFormatter);
+        fetchJson('https://ipv4.lvhai.org/', 'node-lvhai-v4', nodeFormatter);
+        fetchJson('https://ipv6.lvhai.org/', 'node-lvhai-v6', nodeFormatter);
+    };
+
+    // --- INITIALIZE ---
+    
+    getIpPriority();
+    getIpv4Info();
+    getIpv6Info();
+    getSystemInfo();
+    runAllTests();
+});
+</script>
+</body>
+</html>
